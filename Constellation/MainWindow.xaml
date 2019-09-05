@@ -1,0 +1,173 @@
+﻿<Window x:Class="Constellation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Constellation"
+        xmlns:valueConverter="clr-namespace:Constellation.ValueConverter"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:command="http://www.galasoft.ch/mvvmlight"
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}"
+        mc:Ignorable="d"
+        Background="Black"
+        MinHeight="300"
+        MinWidth="300"
+        Title="WpfConstellation"
+        Height="{Binding Path=MaxY, Mode=TwoWay, Converter={StaticResource IntConverter}}"
+        Width="{Binding Path=MaxX, Mode=TwoWay, Converter={StaticResource IntConverter}}">
+    <Window.Resources>
+        <valueConverter:NodeToPathStrokeConverter x:Key="NodeToPathStrokeConverter" />
+        <valueConverter:NodeToPathDataConverter x:Key="NodeToPathDataConverter" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0"
+                      IsChecked="{Binding Path=CollisionEnabled}"
+                      Foreground="White">
+                Enable Collision
+            </CheckBox>
+            <WrapPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBlock Foreground="White" Text="Points count:" />
+                <Button Width="15"
+                        Command="{Binding AddPoint}"
+                        Content="+" />
+
+                <TextBox Foreground="White"
+                         Width="30"
+                         Background="Transparent"
+                         Text="{Binding PointsCount, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+
+                <Button Width="15"
+                        Command="{Binding RemovePoint}"
+                        Content="-" />
+            </WrapPanel>
+
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Foreground="White"
+                           Text="Acceleration:" />
+
+                <Slider HorizontalAlignment="Stretch"
+                        Grid.Column="1"
+                        IsSnapToTickEnabled="True"
+                        TickFrequency="0.0005"
+                        TickPlacement="Both"
+                        Value="{Binding Path=Drag, Mode=TwoWay}"
+                        Minimum="0.998"
+                        Maximum="1.002" />
+            </Grid>
+
+            <WrapPanel Grid.Column="3" Orientation="Horizontal">
+                <TextBlock Foreground="White" Text="Connection limit:" />
+                <Button Width="15"
+                        Command="{Binding RaiseConnectionLimit}"
+                        Content="+" />
+
+                <TextBox Foreground="White"
+                         Width="30"
+                         Background="Transparent"
+                         Text="{Binding LimitConnections, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+
+                <Button Width="15"
+                        Command="{Binding LowerConnectionLimit}"
+                        Content="-" />
+            </WrapPanel>
+
+            <Grid Grid.Column="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Foreground="White"
+                           Text="Connection max length:" />
+
+                <Slider HorizontalAlignment="Stretch"
+                        Grid.Column="1"
+                        Value="{Binding Path=ConnectionDistance, Mode=TwoWay}"
+                        Minimum="0"
+                        Maximum="100000" />
+            </Grid>
+
+            <Grid Grid.Column="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Foreground="White"
+                           TextAlignment="Right"
+                           Text="Calculation Hz:" />
+                <TextBlock Grid.Column="1" Foreground="White" Margin="15 0"
+                           TextAlignment="Right"
+                           Width="50"
+                           Text="{Binding Path=LoopFrequency}" />
+            </Grid>
+
+
+        </Grid>
+
+        <ItemsControl Grid.Row="0" ItemsSource="{Binding Path=Points}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="Canvas.Left" Value="{Binding X}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Canvas>
+                        <Path>
+                            <Path.Data>
+                                <MultiBinding Converter="{StaticResource NodeToPathDataConverter}">
+                                    <Binding Path="DataContext.Points"
+                                             RelativeSource="{RelativeSource FindAncestor, AncestorType=Window}" />
+                                    <Binding />
+                                </MultiBinding>
+                            </Path.Data>
+                            <Path.Stroke>
+                                <MultiBinding Converter="{StaticResource NodeToPathStrokeConverter}">
+                                    <Binding Path="DataContext.Points"
+                                             RelativeSource="{RelativeSource FindAncestor, AncestorType=Window}" />
+                                    <Binding />
+                                </MultiBinding>
+                            </Path.Stroke>
+                            <Path.Fill>
+                                <MultiBinding Converter="{StaticResource NodeToPathStrokeConverter}"
+                                              ConverterParameter="0.18">
+                                    <Binding Path="DataContext.Points"
+                                             RelativeSource="{RelativeSource FindAncestor, AncestorType=Window}" />
+                                    <Binding />
+                                </MultiBinding>
+                            </Path.Fill>
+                        </Path>
+
+                        <Ellipse Fill="WhiteSmoke" Width="{Binding Path=Diameter}" Height="{Binding Path=Diameter}"
+                                 Margin="{Binding Path=OriginCorrection}" />
+
+                    </Canvas>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</Window>
